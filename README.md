@@ -47,7 +47,7 @@ $app([ // dynamic definition, dynamic has higher priority
 $app->newsletter->send();
 ```
 
-Using trait
+### Using trait
 
 ```php
 <?php
@@ -60,7 +60,7 @@ class App
 }
 ```
 
-Extending each service in container using `_factory`
+### Extending each service in container using `_factory`
 
 
 ```php
@@ -79,7 +79,7 @@ $validators([
 
 ```
  
-Lazy dynamic services definition using `_init`, no proxy manager needed
+### Lazy dynamic services definition using `_init`, no proxy manager needed
 
 ```php
 <?php
