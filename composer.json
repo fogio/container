@@ -1,0 +1,13 @@
+{
+    "name": "fogio/container",
+    "description": "Fogio Dependency Injection Container",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": ">=7.0.0"
+    },
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": { "Fogio\\Container\\": "src" }
+    }
+}
