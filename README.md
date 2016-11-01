@@ -111,6 +111,6 @@ $emailValidator = $validators->email;
 // or checking if service is defined
 isset($validators->email);
 
-// calls the `_init` feature and configure the container;
+// calls the `_init` feature and configure the container
 
 ```
