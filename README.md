@@ -16,8 +16,6 @@ Usage
 -----
 
 Static definitions
-
-
 ```php
 <?php
 
@@ -47,9 +45,8 @@ $app = new App();
 $app->newsletter->send();
 ```
 
+
 Dynamic definitions by `__invoke`
-
-
 ```php
 <?php
 
@@ -70,8 +67,8 @@ $app([
 $app->newsletter->send();
 ```
 
-Dynamic has higher priority
 
+Dynamic has higher priority
 ```php
 <?php
 
@@ -94,8 +91,8 @@ $app([
 echo get_class($app->newsletter); // NewsletterB
 ```
 
-Using trait
 
+Using trait
 ```php
 <?php
 
@@ -107,9 +104,8 @@ class App
 }
 ```
 
+
 Extending each service in container using `_factory`
-
-
 ```php
 <?php
 
@@ -130,8 +126,8 @@ $validators([
 
 ```
 
-`_factory` is called even if service is not defined
 
+`_factory` is called even if service is not defined
 ```php
 <?php
 
@@ -150,9 +146,8 @@ $services([
 
 ```
 
- 
-Lazy dynamic services definition using `_init`, no proxy manager needed
 
+Lazy dynamic services definition using `_init`, no proxy manager needed
 ```php
 <?php
 
