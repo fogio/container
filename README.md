@@ -23,7 +23,7 @@ use Fogio\Container;
 
 class App extends Container
 {
-    protected function _db()
+    protected function _db() // service name is prefixed with `_`
     {
         return $this->db = new Pdo('mysql:host=localhost;dbname=test'); // shared definition, injection
     }
@@ -180,4 +180,61 @@ isset($validators->email);
 
 // calls the `_init` feature and configure the container
 
+```
+
+`_init` and `factory` are reserved services names
+
+
+Simple auto-injection mechanism by interfaces
+
+Static definitions
+```php
+<?php
+
+use Fogio\Container;
+
+class App extends Container
+{
+    protected function _db()
+    {
+        return $this->db = new Pdo('mysql:host=localhost;dbname=test');
+    }
+
+    protected function _mailer()
+    {
+        return Mailer::class;
+    }
+
+    protected function _news
+    {
+        return News::class;
+    }
+
+    protected function _newsletter
+    {
+        return Newsletter::class;
+    }
+
+    protected function __factory($service, $name)
+    {
+        foreach (
+            [
+                DbAwareInterface => ['setDb' => 'db'],
+                MailerAwareINterface => ['setMailer' => 'mailer'],
+            ] 
+            as $interface => $injections
+        ) {
+            foreach ($injections as $method => $dependence) {
+                $service->{$method}($this->$dependence);
+            }
+        }
+
+    }
+}
+
+class News implements DbAwareInterface {}
+class Newsletter implements DbAwareInterface, MailerAwareInterface {}
+
+$app = new App();
+$newsletter = $app->newsletter;
 ```
