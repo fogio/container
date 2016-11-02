@@ -186,8 +186,6 @@ isset($validators->email);
 
 
 Simple auto-injection mechanism by interfaces
-
-Static definitions
 ```php
 <?php
 
