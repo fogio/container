@@ -1,8 +1,8 @@
 Fogio Container
 ===============
 
-Dependency Injection Container, IoC - Inverse of Control, fast, simple, 
-no auto injection, static/dynamic/lazy services definition
+Dependency Injection Container; IoC - Inverse of Control; fast; simple; 
+no auto injection; static, dynamic, lazy services definition
 
 
 Instalation
