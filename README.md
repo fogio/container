@@ -15,39 +15,86 @@ composer require fogio/container
 Usage
 -----
 
+Static definitions
+
+
 ```php
 <?php
 
 use Fogio\Container;
 
-class App extends Container // static definitions
+class App extends Container
 {
-    protected function _config()
-    {
-        return (object)[ // non shared service definition
-            'db' => 'mysql:host=localhost;dbname=test',
-        ];
-    }
-
     protected function _db()
     {
-        return $this->db = new Pdo($this->config->db); // shared definition, injection
+        return $this->db = new Pdo('mysql:host=localhost;dbname=test'); // shared definition, injection
+    }
+
+    protected function _mailer()
+    {
+        return Mailer::class; // shared, setDefaultShared(true) by default
+    }
+
+    protected function _newsletter()
+    {
+        return new (Newsletter()) // non shared 
+            ->setMailer($this->mailer) // injection
+            ->setDb($this->db)
     }
 }
 
 $app = new App();
-$app([ // dynamic definition, dynamic has higher priority
-    'mailer' => Mailer::class, // shared, defult is setDefaultShared(true)
-    'newsletter' => function ($container) { 
+$app->newsletter->send();
+```
+
+Dynamic definitions by `__invoke`
+
+
+```php
+<?php
+
+use Fogio\Container;
+
+$app = new Container();
+$app([
+    'newsletter' => function ($c) { 
+        return $c->db = new Pdo(mysql:host=localhost;dbname=test); // shared
+    },
+    'mailer' => Mailer::class, // shared
+    'newsletter' => function ($c) { 
         return new (Newsletter()) // non shared 
-            ->setMailer($container->mailer) // injection
-            ->setDb($container->db)
+            ->setMailer($c->mailer) // injection
+            ->setDb($c->db)
     },
 ]);
 $app->newsletter->send();
 ```
 
-### Using trait
+Dynamic has higher priority
+
+```php
+<?php
+
+use Fogio\Container;
+
+class App extends Container
+{
+    protected function _newsletter()
+    {
+        return NewsletterA::class;
+    }
+}
+
+$app = new App();
+$app([
+    'newsletter' => function ($c) { 
+        return NewsletterB::class; // shared
+    },
+]);
+echo get_class($app->newsletter); // NewsletterB
+```
+
+Using trait
 
 ```php
 <?php
@@ -60,7 +107,7 @@ class App
 }
 ```
 
-### Extending each service in container using `_factory`
+Extending each service in container using `_factory`
 
 
 ```php
@@ -73,18 +120,43 @@ $validators([
     'notEmpty' => NotEmpty::class,
     'email'    => Email::class,
     '_factory' => function($service, $name, $container) {
-        return $service->setTranslator(new Translator());
+        if ($service instanceof TranslatorAwareInterface) {
+            $service->setTranslator(new Translator());
+        }
+
+        return $service;
     }
 ]);
 
 ```
- 
-### Lazy dynamic services definition using `_init`, no proxy manager needed
+
+`_factory` is called even if service is not defined
 
 ```php
 <?php
 
-use Fogio\ContainerTrait;
+use Fogio\Container;
+
+$services = new Container();
+$services([
+    '_factory' => function($service, $name, $container) {
+        if ($service == null) {
+            $service = new DefaultService();
+        }
+
+        return $service;
+    }
+]);
+
+```
+
+ 
+Lazy dynamic services definition using `_init`, no proxy manager needed
+
+```php
+<?php
+
+use Fogio\Container;
 
 class Validators extends Container implements LostInToughtInterface
 {
