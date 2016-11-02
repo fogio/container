@@ -205,12 +205,12 @@ class App extends Container
         return Mailer::class;
     }
 
-    protected function _news
+    protected function _news()
     {
         return News::class;
     }
 
-    protected function _newsletter
+    protected function _newsletter()
     {
         return Newsletter::class;
     }
