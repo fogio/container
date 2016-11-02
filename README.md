@@ -25,7 +25,7 @@ class App extends Container
 {
     protected function _db() // service name is prefixed with `_`
     {
-        return $this->db = new Pdo('mysql:host=localhost;dbname=test'); // shared definition, injection
+        return $this->db = new Pdo('mysql:host=localhost;dbname=test'); // shared, injection
     }
 
     protected function _mailer()
