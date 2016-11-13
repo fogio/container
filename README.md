@@ -1,19 +1,16 @@
-Fogio Container
-===============
+# Fogio Container
 
-Dependency Injection Container; IoC - Inverse of Control; fast; simple; 
+Dependency Injection Container; IoC - Inverse of Control; fast; simple;
 no auto injection; static, dynamic, lazy services definition
 
 
-Instalation
------------
+## Instalation
 
 ```
 composer require fogio/container
-````
+```
 
-Usage
------
+## Usage
 
 Static definitions
 ```php
@@ -35,7 +32,7 @@ class App extends Container
 
     protected function _newsletter()
     {
-        return new (Newsletter()) // non shared 
+        return new (Newsletter()) // non shared
             ->setMailer($this->mailer) // injection
             ->setDb($this->db)
     }
@@ -54,12 +51,12 @@ use Fogio\Container;
 
 $app = new Container();
 $app([
-    'newsletter' => function ($c) { 
-        return $c->db = new Pdo(mysql:host=localhost;dbname=test); // shared
+    'newsletter' => function ($c) {
+        return $c->db = new Pdo('mysql:host=localhost;dbname=test'); // shared
     },
     'mailer' => Mailer::class, // shared
-    'newsletter' => function ($c) { 
-        return new (Newsletter()) // non shared 
+    'newsletter' => function ($c) {
+        return new (Newsletter()) // non shared
             ->setMailer($c->mailer) // injection
             ->setDb($c->db)
     },
@@ -84,7 +81,7 @@ class App extends Container
 
 $app = new App();
 $app([
-    'newsletter' => function ($c) { 
+    'newsletter' => function ($c) {
         return NewsletterB::class; // shared
     },
 ]);
@@ -98,7 +95,7 @@ Using trait
 
 use Fogio\ContainerTrait;
 
-class App 
+class App
 {
     use ContainerTrait;
 }
