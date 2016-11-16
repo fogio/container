@@ -2,14 +2,9 @@
 
 namespace Fogio\Container;
 
-/**
- * @todo lazy services
- */
 trait ContainerTrait
 {
     protected $_containerServicesDefinitions = array();
-    protected $_containerDefaultShared = false;
-    protected $_containerFallback;
 
     public function __invoke(array $definitions)
     {
@@ -32,10 +27,6 @@ trait ContainerTrait
             return true;
         }
 
-        if ($this->_containerFallback) {
-            return $this->_containerFallback->$name;
-        }
-
         return false;
     }
 
@@ -51,7 +42,7 @@ trait ContainerTrait
             $definition = $this->_containerServicesDefinitions[$name];
 
             if (is_string($definition)) {
-                $service = new $definition();
+                $this->$name = $service = new $definition(); // defined as string are shared
             } elseif ($definition instanceof Closure) {
                 $service = call_user_func($definition, $this);
             } elseif (is_object($definition)) {
@@ -59,8 +50,6 @@ trait ContainerTrait
             }
         } elseif (method_exists($this, '_'.$name)) { // static definition
             $service = $this->{"_$name"}();
-        } elseif ($this->_containerFallback) { // check fallback container
-            return $this->_containerFallback->$name;
         }
 
         if (isset($this->_containerServicesDefinitions['_factory'])) {
@@ -79,40 +68,17 @@ trait ContainerTrait
 
     public function __init()
     {
-        $this->_init = null;
-    }
-
-    public function has($name)
-    {
-        return isset($this->$name);
-    }
-
-    public function get($name)
-    {
-        return $this->$name;
-    }
-
-    public function setDefaultShared($defaultShared)
-    {
-        $this->_containerDefaultShared = $defaultShared;
-
-        return $this;
-    }
-
-    public function setFallbackContainer(ContainerInterface $container)
-    {
-        $this->_containerFallback = $container;
-
-        return $this;
+        $this->_init = true;
     }
 
     public function getIterator()
     {
         $services = array_keys($this->_containerServicesDefinitions);
-        if (in_array('_extend', $services)) {
-            unset($services[array_search('_extend', $services)]);
+        
+        if (in_array('_factory', $services)) {
+            unset($services[array_search('_factory', $services)]);
         }
-        /* @todo add static definitions to $services */
+
         return ArrayIterator($services);
     }
 }
