@@ -55,7 +55,7 @@ trait ContainerTrait
         if (isset($this->_containerServicesDefinitions['_factory'])) {
             $service = call_user_func($this->_containerServicesDefinitions['_factory'], $service, $name, $this);
         } elseif (method_exists($this, '_factory')) {
-            $service = call_user_func([$this, '_factory'], $service, $name, $this);
+            $service = call_user_func([$this, '_factory'], $service, $name);
         }
 
         return $service;
