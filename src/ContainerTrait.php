@@ -63,7 +63,7 @@ trait ContainerTrait
 
     public function __call($name, $args)
     {
-        return call_user_func([$this->$name, 'helper'], $args);
+        return call_user_func([$this->$name, 'invoke'], $args);
     }
 
     public function __init()
