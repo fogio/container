@@ -63,7 +63,11 @@ trait ContainerTrait
 
     public function __call($name, $args)
     {
-        return call_user_func([$this->$name, 'invoke'], $args);
+        $service = $this->$name;
+        if (!$service instanceof InvokableInterface) {
+            throw new LogicException('Service `$name` does not implement `InvokableInterface`');
+        }
+        return call_user_func([$service, 'invoke'], $args);
     }
 
     public function __init()
