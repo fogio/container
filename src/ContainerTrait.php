@@ -4,7 +4,7 @@ namespace Fogio\Container;
 
 trait ContainerTrait
 {
-    protected $_containerServicesDefinitions = array();
+    protected $_containerServicesDefinitions = [];
 
     public function __invoke(array $definitions)
     {
@@ -40,11 +40,11 @@ trait ContainerTrait
         if (isset($this->_containerServicesDefinitions[$name])) { // dynamic definition
 
             $definition = $this->_containerServicesDefinitions[$name];
-
             if (is_string($definition)) {
                 $this->$name = $service = new $definition(); // defined as string are shared
-            } elseif ($definition instanceof Closure) {
+            } elseif ($definition instanceof \Closure) {
                 $service = call_user_func($definition, $this);
+
             } elseif (is_object($definition)) {
                 $service = $definition;
             }
@@ -52,10 +52,14 @@ trait ContainerTrait
             $service = $this->{"_$name"}();
         }
 
+        if ($name === '_init') {
+            return $service;
+        }
+
         if (isset($this->_containerServicesDefinitions['_factory'])) {
             $service = call_user_func($this->_containerServicesDefinitions['_factory'], $service, $name, $this);
-        } elseif (method_exists($this, '_factory')) {
-            $service = call_user_func([$this, '_factory'], $service, $name);
+        } elseif (method_exists($this, '__factory')) {
+            $service = call_user_func([$this, '__factory'], $service, $name);
         }
 
         return $service;
@@ -64,10 +68,10 @@ trait ContainerTrait
     public function __call($name, $args)
     {
         $service = $this->$name;
-        if (!$service instanceof InvokableInterface) {
-            throw new LogicException('Service `$name` does not implement `InvokableInterface`');
-        }
-        return call_user_func([$service, 'invoke'], $args);
+//        if (!$service instanceof InvokableInterface) {
+//            throw new \LogicException('Service `$name` does not implement `InvokableInterface`');
+//        }
+        return call_user_func_array([$service, 'invoke'], $args);
     }
 
     public function __init()
@@ -83,6 +87,6 @@ trait ContainerTrait
             unset($services[array_search('_factory', $services)]);
         }
 
-        return ArrayIterator($services);
+        return new \ArrayIterator($services);
     }
 }
