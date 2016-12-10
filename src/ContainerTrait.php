@@ -4,13 +4,11 @@ namespace Fogio\Container;
 
 trait ContainerTrait
 {
-    protected $_containerServicesDefinitions = [];
+    protected $_define = [];
 
     public function __invoke(array $definitions)
     {
-        $this->_containerServicesDefinitions = array_merge($this->_containerServicesDefinitions, $definitions);
-
-        return $this;
+        return $this->define($definitions);
     }
 
     public function __isset($name)
@@ -19,7 +17,7 @@ trait ContainerTrait
         $this->_init = true;
         
 
-        if (isset($this->_containerServicesDefinitions[$name])) {  // dynamic definition
+        if (isset($this->_define[$name])) {  // dynamic definition
             return true;
         }
 
@@ -37,9 +35,9 @@ trait ContainerTrait
 
         $service = null;
 
-        if (isset($this->_containerServicesDefinitions[$name])) { // dynamic definition
+        if (isset($this->_define[$name])) { // dynamic definition
 
-            $definition = $this->_containerServicesDefinitions[$name];
+            $definition = $this->_define[$name];
             if (is_string($definition)) {
                 $this->$name = $service = new $definition(); // defined as string are shared
             } elseif ($definition instanceof \Closure) {
@@ -56,8 +54,8 @@ trait ContainerTrait
             return $service;
         }
 
-        if (isset($this->_containerServicesDefinitions['_factory'])) {
-            $service = call_user_func($this->_containerServicesDefinitions['_factory'], $service, $name, $this);
+        if (isset($this->_define['_factory'])) {
+            $service = call_user_func($this->_define['_factory'], $service, $name, $this);
         } elseif (method_exists($this, '__factory')) {
             $service = call_user_func([$this, '__factory'], $service, $name);
         }
@@ -67,11 +65,23 @@ trait ContainerTrait
 
     public function __call($name, $args)
     {
+        if (isset($this->_define[':' . $name])) {
+            array_unshift($args, $this);
+            return call_user_func_array($this->_define[':' . $name], $args);
+        }
+
         $service = $this->$name;
 //        if (!$service instanceof InvokableInterface) {
 //            throw new \LogicException('Service `$name` does not implement `InvokableInterface`');
 //        }
         return call_user_func_array([$service, 'invoke'], $args);
+    }
+
+    public function define(array $definitions)
+    {
+        $this->_define = array_merge($this->_define, $definitions);
+
+        return $this;
     }
 
     public function __init()
@@ -81,7 +91,7 @@ trait ContainerTrait
 
     public function getIterator()
     {
-        $services = array_keys($this->_containerServicesDefinitions);
+        $services = array_keys($this->_define);
         
         if (in_array('_factory', $services)) {
             unset($services[array_search('_factory', $services)]);
